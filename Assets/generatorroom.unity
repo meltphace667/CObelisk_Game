@@ -251,7 +251,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -3576441816450763875, guid: 56a8d92bb3433a542bc1bedd07487e38, type: 3}
+  m_Sprite: {fileID: -1858688217066720885, guid: dd219e6a7c8a4724fa8806aecc3f23d0, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -518,7 +518,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 221987725}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b641999499bc7d24b907da2386707ed5, type: 3}
   m_Name: 
@@ -2263,10 +2263,12 @@ MonoBehaviour:
   - {fileID: 989655801}
   - {fileID: 879416217}
   - {fileID: 1004543196}
+  - {fileID: 0}
   useAffectedRoomFilter: 1
   affectedRoomIds:
   - Ob_02
   - LAC_A1
+  - CHA_FAR
   affectUnknownRoom: 0
   enableRoomOverrides: 1
   zeroRoomOverrideMultiplierMeansNeutral: 1
@@ -2346,6 +2348,52 @@ MonoBehaviour:
     skySpeedMultiplier: 0
     skySpeedAdd: 0
     horizonProtectionMultiplier: 0
+    horizonProtectionAdd: 0
+    trailStrengthMultiplier: 0
+    trailStrengthAdd: 0
+    turbulenceMultiplier: 0
+    turbulenceAdd: 0
+    skyTintStrengthMultiplier: 0
+    skyTintStrengthAdd: 0
+    cloudGlowMultiplier: 0
+    cloudGlowAdd: 0
+    shutterPulseMultiplier: 0
+    shutterPulseAdd: 0
+    noiseMultiplier: 0
+    noiseAdd: 0
+    tintMix: 0
+    tintA: {r: 0, g: 0, b: 0, a: 0}
+    tintB: {r: 0, g: 0, b: 0, a: 0}
+    tintC: {r: 0, g: 0, b: 0, a: 0}
+  - roomId: CHA_FAR
+    enabled: 1
+    affectThisRoom: 1
+    overridePreset: 0
+    preset: 2
+    masterIntensityMultiplier: 3
+    masterIntensityAdd: 1.5
+    skyDetectionMultiplier: 1.15
+    skyDetectionAdd: 0
+    cloudDetectionMultiplier: 0
+    cloudDetectionAdd: 0
+    treeProtectionMultiplier: 3
+    treeProtectionAdd: 0
+    timeMultiplierMultiplier: 3.05
+    timeMultiplierAdd: 0.96
+    cloudMotionMultiplierMultiplier: 2.4
+    cloudMotionMultiplierAdd: 2
+    skyMotionMultiplierMultiplier: 0
+    skyMotionMultiplierAdd: 0
+    trailMultiplierMultiplier: 0.11
+    trailMultiplierAdd: 1.59
+    seedAdd: 4.8089637e+10
+    intensityMultiplier: 1.02
+    intensityAdd: 0
+    cloudSpeedMultiplier: 1.3
+    cloudSpeedAdd: 0
+    skySpeedMultiplier: 2.06
+    skySpeedAdd: 0
+    horizonProtectionMultiplier: 1.78
     horizonProtectionAdd: 0
     trailStrengthMultiplier: 0
     trailStrengthAdd: 0
@@ -2671,7 +2719,7 @@ MonoBehaviour:
   autoReadCurrentRoom: 1
   autoPresetFromRoomId: 1
   backgroundManagerLike: {fileID: 712968834}
-  currentRoomId: FOR_01
+  currentRoomId: CHA_FAR
   enableRoomOverrides: 1
   zeroRoomOverrideMultiplierMeansNeutral: 1
   roomOverrides:
@@ -2779,6 +2827,111 @@ MonoBehaviour:
     posterizeAdd: 0
     breathAdd: 0
     dreamColor: {r: 0.22264141, g: 0.20070074, b: 0, a: 1}
+    dreamColorMix: 1
+  - roomId: LAC_A2
+    enabled: 1
+    overridePreset: 1
+    preset: 2
+    masterIntensityMultiplier: 0
+    oldDigitalMultiplier: 3
+    contrastMultiplier: 1.33
+    saturationMultiplier: 0
+    darkCrushMultiplier: 0.3
+    dreamStrengthMultiplier: 0
+    skyAbnormalMultiplier: 0
+    greenPoisonMultiplier: 0
+    grainMultiplier: 2.08
+    vignetteMultiplier: 0
+    chromaticMultiplier: 5
+    microCutMultiplier: 0
+    anomalyMultiplier: 5
+    posterizeMultiplier: 5
+    breathMultiplier: 0
+    oldDigitalAdd: 0.6
+    contrastAdd: -0.04
+    saturationAdd: 1
+    darkCrushAdd: -1
+    dreamStrengthAdd: -1
+    skyAbnormalAdd: -1
+    greenPoisonAdd: -1
+    grainAdd: -1
+    vignetteAdd: -1
+    chromaticAdd: -1
+    microCutAdd: -1
+    anomalyAdd: 0
+    posterizeAdd: 0
+    breathAdd: 0
+    dreamColor: {r: 0.22264141, g: 0.20070074, b: 0, a: 1}
+    dreamColorMix: 1
+  - roomId: FOR_02
+    enabled: 1
+    overridePreset: 1
+    preset: 2
+    masterIntensityMultiplier: 0
+    oldDigitalMultiplier: 3
+    contrastMultiplier: 1.33
+    saturationMultiplier: 0
+    darkCrushMultiplier: 0.3
+    dreamStrengthMultiplier: 0
+    skyAbnormalMultiplier: 0
+    greenPoisonMultiplier: 0
+    grainMultiplier: 2.08
+    vignetteMultiplier: 0
+    chromaticMultiplier: 5
+    microCutMultiplier: 0
+    anomalyMultiplier: 5
+    posterizeMultiplier: 5
+    breathMultiplier: 0
+    oldDigitalAdd: 0.6
+    contrastAdd: -0.04
+    saturationAdd: 1
+    darkCrushAdd: -1
+    dreamStrengthAdd: -1
+    skyAbnormalAdd: -1
+    greenPoisonAdd: -1
+    grainAdd: -1
+    vignetteAdd: -1
+    chromaticAdd: -1
+    microCutAdd: -1
+    anomalyAdd: 0
+    posterizeAdd: 0
+    breathAdd: 0
+    dreamColor: {r: 0.22264141, g: 0.20070074, b: 0, a: 1}
+    dreamColorMix: 1
+  - roomId: CHA_FAR
+    enabled: 1
+    overridePreset: 0
+    preset: 2
+    masterIntensityMultiplier: 2.34
+    oldDigitalMultiplier: 0.42
+    contrastMultiplier: 0.97
+    saturationMultiplier: 3
+    darkCrushMultiplier: 1.14
+    dreamStrengthMultiplier: 0
+    skyAbnormalMultiplier: 0
+    greenPoisonMultiplier: 0
+    grainMultiplier: 2.08
+    vignetteMultiplier: 0.12
+    chromaticMultiplier: 5
+    microCutMultiplier: 5
+    anomalyMultiplier: 5
+    posterizeMultiplier: 5
+    breathMultiplier: 0.08
+    oldDigitalAdd: 0.6
+    contrastAdd: -0.04
+    saturationAdd: 1
+    darkCrushAdd: -1
+    dreamStrengthAdd: -1
+    skyAbnormalAdd: -1
+    greenPoisonAdd: 0.12
+    grainAdd: -0.69
+    vignetteAdd: 1
+    chromaticAdd: -1
+    microCutAdd: -1
+    anomalyAdd: -0.1
+    posterizeAdd: 0
+    breathAdd: 0
+    dreamColor: {r: 0.81886786, g: 0, b: 0, a: 1}
     dreamColorMix: 1
   logFoundImages: 1
 --- !u!1 &1212226118
@@ -3592,7 +3745,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 4255832380273646305, guid: 1b36446dfacdfeb46ae6213873e705c2, type: 3}
+  m_Sprite: {fileID: -870393798076780536, guid: 35caab44a890e4242a7edccfd9653351, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4492,7 +4645,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1858688217066720885, guid: dd219e6a7c8a4724fa8806aecc3f23d0, type: 3}
+  m_Sprite: {fileID: -6365629800890043370, guid: 3280d09c818d3e949b2aafc4e7592742, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
