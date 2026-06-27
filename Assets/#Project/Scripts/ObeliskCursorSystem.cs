@@ -11,6 +11,7 @@ public class ObeliskCursorSystem : MonoBehaviour
     private enum CursorStyle
     {
         Normal,
+        Clickable,
         Impossible,
         Action,
         Attack,
@@ -20,6 +21,19 @@ public class ObeliskCursorSystem : MonoBehaviour
     [Header("Curseurs originaux")]
     [SerializeField] private Texture2D normalCursor;
     [SerializeField] private Texture2D impossibleCursor;
+
+    [Header("Curseur main / surface clickable")]
+    [Tooltip("Nouveau curseur affiché quand la souris survole une vraie surface cliquable. Mets ici ton PNG de main.")]
+    [SerializeField] private Texture2D clickableCursor;
+
+    [Tooltip("Si activé, les zones directionnelles valides utilisent le curseur main au lieu du curseur normal.")]
+    [SerializeField] private bool useClickableCursorOnValidDirectionZones = true;
+
+    [Tooltip("Zones supplémentaires où le curseur devient la main. Ajoute ici tes surfaces cliquables invisibles/spéciales.")]
+    [SerializeField] private List<RectTransform> clickableZones = new List<RectTransform>();
+
+    [Tooltip("Si le curseur main n'est pas assigné, le script utilise Action Cursor en fallback pour les surfaces cliquables.")]
+    [SerializeField] private bool fallbackToActionCursorForClickable = true;
 
     [Tooltip("Curseur qui indique au joueur qu'il peut faire une action : examiner, prendre, cliquer, activer, etc.")]
     [SerializeField] private Texture2D actionCursor;
@@ -175,6 +189,10 @@ public class ObeliskCursorSystem : MonoBehaviour
     [Header("Hotspots en pixels depuis le coin haut-gauche")]
     [SerializeField] private Vector2 normalHotspot = Vector2.zero;
     [SerializeField] private Vector2 impossibleHotspot = Vector2.zero;
+
+    [Tooltip("Hotspot de la main clickable. Pour un PNG 128x128, commence avec X=20 / Y=15 si le bout du doigt est en haut à gauche.")]
+    [SerializeField] private Vector2 clickableHotspot = new Vector2(20f, 15f);
+
     [SerializeField] private Vector2 actionHotspot = Vector2.zero;
     [SerializeField] private Vector2 attackHotspot = Vector2.zero;
 
@@ -216,6 +234,7 @@ public class ObeliskCursorSystem : MonoBehaviour
 
     private Texture2D safeNormalCursor;
     private Texture2D safeImpossibleCursor;
+    private Texture2D safeClickableCursor;
     private Texture2D safeActionCursor;
     private Texture2D safeAttackCursor;
     private Texture2D safeObeliskSurpriseCursor;
@@ -231,6 +250,7 @@ public class ObeliskCursorSystem : MonoBehaviour
 
     private Texture2D lastNormalSource;
     private Texture2D lastImpossibleSource;
+    private Texture2D lastClickableSource;
     private Texture2D lastActionSource;
     private Texture2D lastAttackSource;
     private Texture2D lastObeliskSurpriseSource;
@@ -338,12 +358,14 @@ public class ObeliskCursorSystem : MonoBehaviour
 
         DestroySafeTexture(safeNormalCursor);
         DestroySafeTexture(safeImpossibleCursor);
+        DestroySafeTexture(safeClickableCursor);
         DestroySafeTexture(safeActionCursor);
         DestroySafeTexture(safeAttackCursor);
         DestroySafeTexture(safeObeliskSurpriseCursor);
 
         safeNormalCursor = MakeCursorSafeTexture(normalCursor, "Normal", cursorScale);
         safeImpossibleCursor = MakeCursorSafeTexture(impossibleCursor, "Impossible", cursorScale);
+        safeClickableCursor = MakeCursorSafeTexture(clickableCursor, "Clickable", cursorScale);
         safeActionCursor = MakeCursorSafeTexture(actionCursor, "Action", cursorScale);
         safeAttackCursor = MakeCursorSafeTexture(attackCursor, "Attack", cursorScale);
         safeObeliskSurpriseCursor = MakeCursorSafeTexture(obeliskSurpriseCursor, "ObeliskSurprise", obeliskSurpriseScale);
@@ -353,6 +375,7 @@ public class ObeliskCursorSystem : MonoBehaviour
 
         lastNormalSource = normalCursor;
         lastImpossibleSource = impossibleCursor;
+        lastClickableSource = clickableCursor;
         lastActionSource = actionCursor;
         lastAttackSource = attackCursor;
         lastObeliskSurpriseSource = obeliskSurpriseCursor;
@@ -403,27 +426,45 @@ public class ObeliskCursorSystem : MonoBehaviour
 
         Vector2 mousePosition = InputMouse.current.position.ReadValue();
 
-        // Priorité : Attack > Action > Impossible > Directions > Normal.
+        // Priorité : Attack > Action > Clickable > Impossible > Directions > Normal.
+        // Clickable = curseur main quand le joueur survole une surface réellement cliquable.
         if (IsMouseInsideAny(attackZones, mousePosition))
             return CursorStyle.Attack;
 
         if (IsMouseInsideAny(actionZones, mousePosition))
             return CursorStyle.Action;
 
+        if (IsMouseInsideAny(clickableZones, mousePosition))
+            return CursorStyle.Clickable;
+
         if (IsMouseInsideAny(impossibleZones, mousePosition))
             return CursorStyle.Impossible;
 
         if (IsMouseInside(zoneHaut, mousePosition))
-            return CanMove("haut") ? CursorStyle.Normal : CursorStyle.Impossible;
+            return CanMove("haut") ? GetValidClickableStyle() : CursorStyle.Impossible;
 
         if (IsMouseInside(zoneBas, mousePosition))
-            return CanMove("bas") ? CursorStyle.Normal : CursorStyle.Impossible;
+            return CanMove("bas") ? GetValidClickableStyle() : CursorStyle.Impossible;
 
         if (IsMouseInside(zoneGauche, mousePosition))
-            return CanMove("gauche") ? CursorStyle.Normal : CursorStyle.Impossible;
+            return CanMove("gauche") ? GetValidClickableStyle() : CursorStyle.Impossible;
 
         if (IsMouseInside(zoneDroite, mousePosition))
-            return CanMove("droite") ? CursorStyle.Normal : CursorStyle.Impossible;
+            return CanMove("droite") ? GetValidClickableStyle() : CursorStyle.Impossible;
+
+        return CursorStyle.Normal;
+    }
+
+    private CursorStyle GetValidClickableStyle()
+    {
+        if (!useClickableCursorOnValidDirectionZones)
+            return CursorStyle.Normal;
+
+        if (safeClickableCursor != null)
+            return CursorStyle.Clickable;
+
+        if (fallbackToActionCursorForClickable && safeActionCursor != null)
+            return CursorStyle.Action;
 
         return CursorStyle.Normal;
     }
@@ -1575,6 +1616,15 @@ public class ObeliskCursorSystem : MonoBehaviour
             case CursorStyle.Impossible:
                 return safeImpossibleCursor;
 
+            case CursorStyle.Clickable:
+                if (safeClickableCursor != null)
+                    return safeClickableCursor;
+
+                if (fallbackToActionCursorForClickable)
+                    return safeActionCursor;
+
+                return safeNormalCursor;
+
             case CursorStyle.Action:
                 return safeActionCursor;
 
@@ -1595,6 +1645,15 @@ public class ObeliskCursorSystem : MonoBehaviour
         {
             case CursorStyle.Impossible:
                 return impossibleHotspot;
+
+            case CursorStyle.Clickable:
+                if (safeClickableCursor != null)
+                    return clickableHotspot;
+
+                if (fallbackToActionCursorForClickable)
+                    return actionHotspot;
+
+                return normalHotspot;
 
             case CursorStyle.Action:
                 return actionHotspot;
@@ -1635,6 +1694,9 @@ public class ObeliskCursorSystem : MonoBehaviour
             return true;
 
         if (lastImpossibleSource != impossibleCursor)
+            return true;
+
+        if (lastClickableSource != clickableCursor)
             return true;
 
         if (lastActionSource != actionCursor)

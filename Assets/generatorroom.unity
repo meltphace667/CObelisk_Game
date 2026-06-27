@@ -745,14 +745,14 @@ RectTransform:
   m_GameObject: {fileID: 453632527}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5128001, y: 3.506332, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2141920816}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 25.894283, y: 449.39}
+  m_AnchoredPosition: {x: -1, y: 593}
   m_SizeDelta: {x: 1814.2715, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &453632529
@@ -846,38 +846,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_RenderShadows: 1
-  m_RequiresDepthTextureOption: 2
-  m_RequiresOpaqueTextureOption: 2
-  m_CameraType: 0
-  m_Cameras: []
-  m_RendererIndex: -1
-  m_VolumeLayerMask:
-    serializedVersion: 2
-    m_Bits: 1
-  m_VolumeTrigger: {fileID: 0}
-  m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
-  m_Antialiasing: 0
-  m_AntialiasingQuality: 2
-  m_StopNaN: 0
-  m_Dithering: 0
-  m_ClearDepth: 1
-  m_AllowXRRendering: 1
-  m_AllowHDROutput: 1
-  m_UseScreenCoordOverride: 0
-  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
-  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
-  m_RequiresDepthTexture: 0
-  m_RequiresColorTexture: 0
-  m_TaaSettings:
-    m_Quality: 3
-    m_FrameInfluence: 0.1
-    m_JitterScale: 1
-    m_MipBias: 0
-    m_VarianceClampScale: 0.9
-    m_ContrastAdaptiveSharpening: 0
-  m_Version: 2
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -973,67 +941,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ComponentVersion: 4
-  m_LightType: 4
-  m_BlendStyleIndex: 0
-  m_Light2DProvider:
-    rid: -2
-  m_SelectionSources:
-    rid: 6177692240859103248
-  m_FalloffIntensity: 0.5
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 1
-  m_LightVolumeIntensity: 1
-  m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 00000000
-  m_LightCookieSprite: {fileID: 0}
-  m_DeprecatedPointLightCookieSprite: {fileID: 0}
-  m_LightOrder: 0
-  m_AlphaBlendOnOverlap: 0
-  m_OverlapOperation: 0
-  m_NormalMapDistance: 3
-  m_NormalMapQuality: 2
-  m_UseNormalMap: 0
-  m_ShadowsEnabled: 0
-  m_ShadowIntensity: 0.75
-  m_ShadowSoftness: 0
-  m_ShadowSoftnessFalloffIntensity: 0.5
-  m_ShadowVolumeIntensityEnabled: 0
-  m_ShadowVolumeIntensity: 0.75
-  m_LocalBounds:
-    m_Center: {x: 0, y: -0.00000011920929, z: 0}
-    m_Extent: {x: 0.9985302, y: 0.99853027, z: 0}
-  m_PointLightInnerAngle: 360
-  m_PointLightOuterAngle: 360
-  m_PointLightInnerRadius: 0
-  m_PointLightOuterRadius: 1
-  m_ShapeLightParametricSides: 5
-  m_ShapeLightParametricAngleOffset: 0
-  m_ShapeLightParametricRadius: 1
-  m_ShapeLightFalloffSize: 0.5
-  m_ShapeLightFalloffOffset: {x: 0, y: 0}
-  m_ShapePath:
-  - {x: -0.5, y: -0.5, z: 0}
-  - {x: 0.5, y: -0.5, z: 0}
-  - {x: 0.5, y: 0.5, z: 0}
-  - {x: -0.5, y: 0.5, z: 0}
-  references:
-    version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
-    - rid: 6177692240859103248
-      type: {class: Light2DProviderSources, ns: UnityEngine.Rendering.Universal, asm: Unity.RenderPipelines.Universal.2D.Runtime}
-      data:
-        m_SelectedHashCode: 4
-        m_SelectedSource:
-          rid: -2
-        m_Provider2DCache:
-          rid: 6177692285385310281
-    - rid: 6177692285385310281
-      type: {class: 'Provider2DCache`1[[UnityEngine.Rendering.Universal.Light2DProvider, Unity.RenderPipelines.Universal.2D.Runtime]]', ns: UnityEngine.Rendering.Universal, asm: Unity.RenderPipelines.Universal.2D.Runtime}
-      data:
-        m_Cache: []
 --- !u!4 &619394802
 Transform:
   m_ObjectHideFlags: 0
@@ -1725,10 +1632,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1948a3856e59874cac7464198819b93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObeliskCursorSystem
-  normalCursor: {fileID: 2800000, guid: 5ebd6386f3eddd64682b65037fa0f0fa, type: 3}
-  impossibleCursor: {fileID: 2800000, guid: 8d73566f0e414b84e9cb4d8ebe2547e8, type: 3}
-  actionCursor: {fileID: 2800000, guid: 7841e8a20fa175f4ca84ff33fef67d93, type: 3}
-  attackCursor: {fileID: 0}
+  normalCursor: {fileID: 2800000, guid: 35b8f2f33a0156f4d87542323dd4be06, type: 3}
+  impossibleCursor: {fileID: 2800000, guid: ca88741a0fdddef4eb43f112d2272c1c, type: 3}
+  clickableCursor: {fileID: 2800000, guid: 0258f2ef6b5a4ec4d9e7a4ac90b11a9c, type: 3}
+  useClickableCursorOnValidDirectionZones: 1
+  clickableZones: []
+  fallbackToActionCursorForClickable: 1
+  actionCursor: {fileID: 2800000, guid: a027b28f61cfd384391ecf67d2e95f8e, type: 3}
+  attackCursor: {fileID: 2800000, guid: 90864091d39276e41a2fb4fdb17f0bd5, type: 3}
   obeliskSurpriseCursor: {fileID: 2800000, guid: c46b0b99c12a0564b92683f0215b0939, type: 3}
   enableObeliskSurprise: 0
   obeliskSurpriseOverridesEverything: 1
@@ -1777,6 +1688,7 @@ MonoBehaviour:
   globalMuteAfterGlitchClick: 1
   normalHotspot: {x: 0, y: 0}
   impossibleHotspot: {x: 0, y: 0}
+  clickableHotspot: {x: 20, y: 15}
   actionHotspot: {x: 0, y: 0}
   attackHotspot: {x: 0, y: 0}
   obeliskSurpriseHotspot: {x: 0, y: 0}
@@ -2138,7 +2050,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 10756, guid: 0000000000000000e000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4766,14 +4678,14 @@ RectTransform:
   m_GameObject: {fileID: 1915745946}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 5.658034, y: 0.9409, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2141920816}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -952.3, y: 0.0020466}
+  m_AnchoredPosition: {x: -1019, y: 45}
   m_SizeDelta: {x: 100, y: 798.78}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1915745948
@@ -4931,14 +4843,14 @@ RectTransform:
   m_GameObject: {fileID: 2027889956}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.498444, y: 3.9111736, z: 1.0071}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2141920816}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 15.375, y: -449.39}
+  m_AnchoredPosition: {x: -44, y: -526}
   m_SizeDelta: {x: 1835.3, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2027889958
@@ -5021,14 +4933,14 @@ RectTransform:
   m_GameObject: {fileID: 2079971002}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 6.0582585, y: 0.88002, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2141920816}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 940.81, y: 0.0024872}
+  m_AnchoredPosition: {x: 978, y: 53}
   m_SizeDelta: {x: 100, y: 798.79}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2079971004
