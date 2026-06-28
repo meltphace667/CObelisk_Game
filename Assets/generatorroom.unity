@@ -238,7 +238,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 107523749}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -253,7 +253,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 7083454657747862408, guid: 4f1efbbc353b0264f9ccd29ade3c0150, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -1216,7 +1216,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 536983037}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -1231,7 +1231,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 7083454657747862408, guid: 4f1efbbc353b0264f9ccd29ade3c0150, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -1291,7 +1291,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 557902086}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -1306,7 +1306,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 7083454657747862408, guid: 4f1efbbc353b0264f9ccd29ade3c0150, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -3863,7 +3863,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1336867530}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -3878,7 +3878,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 7083454657747862408, guid: 4f1efbbc353b0264f9ccd29ade3c0150, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -4016,7 +4016,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 500b828854cc7be4e806bf9b98a8c900, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MusicManager
-  music: {fileID: 8300000, guid: 68a61d1c55478674fb29c778f62d6d10, type: 3}
+  music: {fileID: 8300000, guid: b55bbdc1a8a7d5448a57ce84bd79296e, type: 3}
   playOnAwakeImmediately: 1
   loop: 1
   fadeInDuration: 15
@@ -4039,7 +4039,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 68a61d1c55478674fb29c778f62d6d10, type: 3}
+  m_Resource: {fileID: 8300000, guid: b55bbdc1a8a7d5448a57ce84bd79296e, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -4325,8 +4325,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScreenFader
   delayBeforeFirstReveal: 1
-  firstFadeDuration: 10
-  fadeToBlackDuration: 0.4
+  firstFadeDuration: 5.7
+  fadeToBlackDuration: 0.25
   blackHoldDuration: 0.25
   fadeFromBlackDuration: 1.2
   visualCurvePower: 1.25
@@ -5440,7 +5440,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1770009312}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -5455,7 +5455,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 7083454657747862408, guid: 4f1efbbc353b0264f9ccd29ade3c0150, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -6303,7 +6303,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ObeliskBucketQuestSystem
   pickupRoomId: CHA_INT_02
   lakeRoomId: LAC_01
-  obeliskRoomId: Ob_01
+  obeliskRoomId: Ob_02
   requireCorrectRoom: 1
   hasBucket: 0
   bucketIsFull: 0
@@ -6314,13 +6314,13 @@ MonoBehaviour:
   bucketProgressRoot: {fileID: 861597513}
   carriedBucketRoot: {fileID: 1544304602}
   progressBuckets:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  progressEmptySprite: {fileID: 0}
-  progressFullSprite: {fileID: 0}
+  - {fileID: 1770009314}
+  - {fileID: 1336867532}
+  - {fileID: 107523751}
+  - {fileID: 536983039}
+  - {fileID: 557902088}
+  progressEmptySprite: {fileID: 7083454657747862408, guid: 4f1efbbc353b0264f9ccd29ade3c0150, type: 3}
+  progressFullSprite: {fileID: 1316987344218029616, guid: 7b1c9eafc8c2520418cb56f19bec8beb, type: 3}
   tintIfSpritesMissing: 1
   emptyTint: {r: 1, g: 1, b: 1, a: 1}
   fullTint: {r: 0.45, g: 0.85, b: 1, a: 1}
@@ -6381,8 +6381,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ObeliskBucketQuestDirectClickFix
   system: {fileID: 2082925606}
   pickupZone: {fileID: 970442740}
-  lakeZone: {fileID: 0}
-  obeliskZone: {fileID: 0}
+  lakeZone: {fileID: 260438149}
+  obeliskZone: {fileID: 2028654454}
   debugLogs: 1
 --- !u!114 &2082925609
 MonoBehaviour:
@@ -6397,8 +6397,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObeliskBucketQuestRoomClickFix
   system: {fileID: 2082925606}
+  overrideObeliskRoomId: 1
+  obeliskRoomIdOverride: Ob_02
   debugLogs: 1
-  clickAnywhereInCorrectRoom: 1
+  ignoreDirectionZones: 1
+  ignoreScreenEdges: 1
+  edgeMarginPercent: 0.18
+  actionCooldown: 0.25
+  zoneHaut: {fileID: 453632528}
+  zoneBas: {fileID: 2027889957}
+  zoneGauche: {fileID: 1915745947}
+  zoneDroite: {fileID: 2079971003}
 --- !u!1 &2095252292
 GameObject:
   m_ObjectHideFlags: 0

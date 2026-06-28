@@ -3,58 +3,85 @@ using System.Reflection;
 using UnityEngine;
 
 /// <summary>
-/// Fix simple et robuste pour débloquer la quête du seau.
+/// V3 robuste du fix de clic room pour la quête du seau.
 /// 
-/// À mettre sur le même GameObject que ObeliskBucketQuestSystem.
+/// À mettre sur BucketQuestSystem.
 /// 
-/// Il n'utilise PAS directement UnityEngine.InputSystem.Mouse dans le code,
-/// donc il évite l'erreur "Mouse.current n'existe pas".
-/// Il lit le nouveau Input System par réflexion.
+/// IMPORTANT :
+/// - Cette V3 désactive automatiquement l'ancien composant ObeliskBucketQuestRoomClickFix
+///   s'il est encore présent sur la scène.
+/// - Elle ignore les clics sur les zones de déplacement.
+/// - Elle utilise Ob_02 comme room d'offrande par défaut.
 /// 
-/// Fonctionnement :
-/// - Dans la room pickupRoomId : un clic gauche ramasse le seau.
-/// - Dans la room lakeRoomId : un clic gauche remplit le seau.
-/// - Dans la room obeliskRoomId : un clic gauche donne l'eau à l'obélisque.
-/// 
-/// C'est volontairement large : ça clique dans toute la room, pas seulement sur le petit rectangle.
-/// But : débloquer la quête maintenant.
+/// Fichier : ObeliskBucketQuestRoomClickFixV3.cs
+/// Classe : ObeliskBucketQuestRoomClickFixV3
 /// </summary>
 [DisallowMultipleComponent]
-public class ObeliskBucketQuestRoomClickFix : MonoBehaviour
+public class ObeliskBucketQuestRoomClickFixV3 : MonoBehaviour
 {
-    [Header("Référence")]
+    [Header("Référence quête")]
     public ObeliskBucketQuestSystem system;
+
+    [Header("Rooms")]
+    [Tooltip("Force la room d'offrande à Ob_02. Recommandé, car Ob_01 sert surtout de passage vers Ob_02.")]
+    public bool overrideObeliskRoomId = true;
+
+    public string obeliskRoomIdOverride = "Ob_02";
 
     [Header("Options")]
     public bool debugLogs = true;
 
-    [Tooltip("Si ON, le script agit dans toute la room correspondante. Recommandé pour débloquer.")]
-    public bool clickAnywhereInCorrectRoom = true;
+    [Tooltip("Ignore les clics sur Zone_Haut / Zone_Bas / Zone_Gauche / Zone_Droite.")]
+    public bool ignoreDirectionZones = true;
+
+    [Tooltip("Sécurité en plus : ignore les clics sur les bords de l'écran, même si les RectTransform des zones ne sont pas trouvés.")]
+    public bool ignoreScreenEdges = true;
+
+    [Range(0.05f, 0.4f)]
+    public float edgeMarginPercent = 0.18f;
+
+    [Tooltip("Évite que plusieurs actions se déclenchent trop vite.")]
+    public float actionCooldown = 0.25f;
+
+    [Header("Zones directionnelles")]
+    public RectTransform zoneHaut;
+    public RectTransform zoneBas;
+    public RectTransform zoneGauche;
+    public RectTransform zoneDroite;
 
     private BackgroundManager backgroundManager;
+    private Canvas canvas;
+    private Camera uiCamera;
 
     private Type inputMouseType;
     private PropertyInfo mouseCurrentProperty;
     private PropertyInfo mouseLeftButtonProperty;
+    private PropertyInfo mousePositionProperty;
     private PropertyInfo buttonWasPressedThisFrameProperty;
+    private MethodInfo positionReadValueMethod;
+
+    private float lastActionTime = -999f;
 
     private void Reset()
     {
         system = GetComponent<ObeliskBucketQuestSystem>();
+        AutoFindDirectionZones();
     }
 
     private void Awake()
     {
+        DisableOldRoomFixes();
         CacheReferences();
         CacheInputSystemReflection();
     }
 
     private void Start()
     {
+        DisableOldRoomFixes();
         CacheReferences();
 
         if (debugLogs)
-            Debug.Log("[BucketQuestRoomClickFix] Chargé. Clic room actif.");
+            Debug.Log("[BucketQuestRoomClickFixV3] ACTIVE. ObeliskRoom=" + GetObeliskRoomId());
     }
 
     private void Update()
@@ -65,21 +92,37 @@ public class ObeliskBucketQuestRoomClickFix : MonoBehaviour
         if (system == null)
             return;
 
-        if (!WasLeftMousePressedThisFrame())
+        Vector2 mousePos;
+        if (!WasLeftMousePressedThisFrame(out mousePos))
             return;
 
         string room = GetCurrentRoomId();
 
         if (debugLogs)
-            Debug.Log("[BucketQuestRoomClickFix] Clic détecté en room = " + room);
+            Debug.Log("[BucketQuestRoomClickFixV3] Clic room=" + room + " mouse=" + mousePos);
 
-        if (!clickAnywhereInCorrectRoom)
+        if (ignoreDirectionZones && IsDirectionClick(mousePos))
+        {
+            if (debugLogs)
+                Debug.Log("[BucketQuestRoomClickFixV3] Clic ignoré : zone de déplacement.");
+
             return;
+        }
+
+        if (Time.unscaledTime - lastActionTime < actionCooldown)
+        {
+            if (debugLogs)
+                Debug.Log("[BucketQuestRoomClickFixV3] Clic ignoré : cooldown.");
+
+            return;
+        }
 
         if (room == system.pickupRoomId)
         {
+            lastActionTime = Time.unscaledTime;
+
             if (debugLogs)
-                Debug.Log("[BucketQuestRoomClickFix] Tentative PickupBucket.");
+                Debug.Log("[BucketQuestRoomClickFixV3] PickupBucket.");
 
             system.PickupBucket();
             return;
@@ -87,20 +130,61 @@ public class ObeliskBucketQuestRoomClickFix : MonoBehaviour
 
         if (room == system.lakeRoomId)
         {
+            lastActionTime = Time.unscaledTime;
+
             if (debugLogs)
-                Debug.Log("[BucketQuestRoomClickFix] Tentative FillBucketAtLake.");
+                Debug.Log("[BucketQuestRoomClickFixV3] FillBucketAtLake.");
 
             system.FillBucketAtLake();
             return;
         }
 
-        if (room == system.obeliskRoomId)
+        if (room == GetObeliskRoomId())
         {
+            lastActionTime = Time.unscaledTime;
+
             if (debugLogs)
-                Debug.Log("[BucketQuestRoomClickFix] Tentative FeedObelisk.");
+                Debug.Log("[BucketQuestRoomClickFixV3] FeedObelisk.");
 
             system.FeedObelisk();
             return;
+        }
+    }
+
+    private string GetObeliskRoomId()
+    {
+        if (overrideObeliskRoomId && !string.IsNullOrWhiteSpace(obeliskRoomIdOverride))
+            return obeliskRoomIdOverride;
+
+        return system != null ? system.obeliskRoomId : "";
+    }
+
+    private void DisableOldRoomFixes()
+    {
+        MonoBehaviour[] behaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+
+        for (int i = 0; i < behaviours.Length; i++)
+        {
+            MonoBehaviour behaviour = behaviours[i];
+
+            if (behaviour == null)
+                continue;
+
+            if (behaviour == this)
+                continue;
+
+            Type type = behaviour.GetType();
+
+            if (type == null)
+                continue;
+
+            if (type.Name == "ObeliskBucketQuestRoomClickFix")
+            {
+                behaviour.enabled = false;
+
+                if (debugLogs)
+                    Debug.Log("[BucketQuestRoomClickFixV3] Ancien ObeliskBucketQuestRoomClickFix désactivé sur " + behaviour.gameObject.name);
+            }
         }
     }
 
@@ -111,6 +195,94 @@ public class ObeliskBucketQuestRoomClickFix : MonoBehaviour
 
         if (backgroundManager == null)
             backgroundManager = FindAnyObjectByType<BackgroundManager>();
+
+        if (zoneHaut == null || zoneBas == null || zoneGauche == null || zoneDroite == null)
+            AutoFindDirectionZones();
+
+        if (canvas == null)
+        {
+            if (zoneHaut != null)
+                canvas = zoneHaut.GetComponentInParent<Canvas>();
+
+            if (canvas == null)
+                canvas = FindAnyObjectByType<Canvas>();
+        }
+
+        if (canvas != null)
+        {
+            if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+                uiCamera = null;
+            else
+                uiCamera = canvas.worldCamera;
+        }
+    }
+
+    private void AutoFindDirectionZones()
+    {
+        GameObject haut = GameObject.Find("Zone_Haut");
+        GameObject bas = GameObject.Find("Zone_Bas");
+        GameObject gauche = GameObject.Find("Zone_Gauche");
+        GameObject droite = GameObject.Find("Zone_Droite");
+
+        if (haut != null)
+            zoneHaut = haut.GetComponent<RectTransform>();
+
+        if (bas != null)
+            zoneBas = bas.GetComponent<RectTransform>();
+
+        if (gauche != null)
+            zoneGauche = gauche.GetComponent<RectTransform>();
+
+        if (droite != null)
+            zoneDroite = droite.GetComponent<RectTransform>();
+    }
+
+    private bool IsDirectionClick(Vector2 mousePos)
+    {
+        CacheReferences();
+
+        if (IsInside(zoneHaut, mousePos))
+            return true;
+
+        if (IsInside(zoneBas, mousePos))
+            return true;
+
+        if (IsInside(zoneGauche, mousePos))
+            return true;
+
+        if (IsInside(zoneDroite, mousePos))
+            return true;
+
+        if (ignoreScreenEdges)
+        {
+            float marginX = Screen.width * edgeMarginPercent;
+            float marginY = Screen.height * edgeMarginPercent;
+
+            if (mousePos.x <= marginX)
+                return true;
+
+            if (mousePos.x >= Screen.width - marginX)
+                return true;
+
+            if (mousePos.y <= marginY)
+                return true;
+
+            if (mousePos.y >= Screen.height - marginY)
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool IsInside(RectTransform zone, Vector2 mousePos)
+    {
+        if (zone == null)
+            return false;
+
+        if (!zone.gameObject.activeInHierarchy)
+            return false;
+
+        return RectTransformUtility.RectangleContainsScreenPoint(zone, mousePos, uiCamera);
     }
 
     private string GetCurrentRoomId()
@@ -147,7 +319,7 @@ public class ObeliskBucketQuestRoomClickFix : MonoBehaviour
         if (inputMouseType == null)
         {
             if (debugLogs)
-                Debug.LogWarning("[BucketQuestRoomClickFix] Type UnityEngine.InputSystem.Mouse introuvable. Le clic Input System ne sera pas lu.");
+                Debug.LogWarning("[BucketQuestRoomClickFixV3] UnityEngine.InputSystem.Mouse introuvable.");
 
             return;
         }
@@ -159,6 +331,11 @@ public class ObeliskBucketQuestRoomClickFix : MonoBehaviour
 
         mouseLeftButtonProperty = inputMouseType.GetProperty(
             "leftButton",
+            BindingFlags.Public | BindingFlags.Instance
+        );
+
+        mousePositionProperty = inputMouseType.GetProperty(
+            "position",
             BindingFlags.Public | BindingFlags.Instance
         );
     }
@@ -177,62 +354,107 @@ public class ObeliskBucketQuestRoomClickFix : MonoBehaviour
         return null;
     }
 
-    private bool WasLeftMousePressedThisFrame()
+    private bool WasLeftMousePressedThisFrame(out Vector2 mousePos)
     {
-        // Nouveau Input System par réflexion : pas de dépendance directe à Mouse.current.
+        mousePos = Vector2.zero;
+
         try
         {
-            if (inputMouseType == null || mouseCurrentProperty == null || mouseLeftButtonProperty == null)
+            if (inputMouseType == null || mouseCurrentProperty == null || mouseLeftButtonProperty == null || mousePositionProperty == null)
                 CacheInputSystemReflection();
 
-            if (inputMouseType != null && mouseCurrentProperty != null && mouseLeftButtonProperty != null)
+            if (inputMouseType == null || mouseCurrentProperty == null || mouseLeftButtonProperty == null)
+                return false;
+
+            object mouse = mouseCurrentProperty.GetValue(null, null);
+
+            if (mouse == null)
+                return false;
+
+            object leftButton = mouseLeftButtonProperty.GetValue(mouse, null);
+
+            if (leftButton == null)
+                return false;
+
+            if (buttonWasPressedThisFrameProperty == null)
             {
-                object mouse = mouseCurrentProperty.GetValue(null, null);
-
-                if (mouse != null)
-                {
-                    object leftButton = mouseLeftButtonProperty.GetValue(mouse, null);
-
-                    if (leftButton != null)
-                    {
-                        if (buttonWasPressedThisFrameProperty == null)
-                        {
-                            buttonWasPressedThisFrameProperty = leftButton.GetType().GetProperty(
-                                "wasPressedThisFrame",
-                                BindingFlags.Public | BindingFlags.Instance
-                            );
-                        }
-
-                        if (buttonWasPressedThisFrameProperty != null)
-                        {
-                            object value = buttonWasPressedThisFrameProperty.GetValue(leftButton, null);
-
-                            if (value is bool pressed && pressed)
-                                return true;
-                        }
-                    }
-                }
+                buttonWasPressedThisFrameProperty = leftButton.GetType().GetProperty(
+                    "wasPressedThisFrame",
+                    BindingFlags.Public | BindingFlags.Instance
+                );
             }
+
+            if (buttonWasPressedThisFrameProperty == null)
+                return false;
+
+            object pressedValue = buttonWasPressedThisFrameProperty.GetValue(leftButton, null);
+
+            bool pressed = pressedValue is bool b && b;
+
+            if (!pressed)
+                return false;
+
+            mousePos = ReadMousePosition(mouse);
+            return true;
         }
         catch (Exception e)
         {
             if (debugLogs)
-                Debug.LogWarning("[BucketQuestRoomClickFix] Lecture Input System impossible : " + e.Message);
-        }
+                Debug.LogWarning("[BucketQuestRoomClickFixV3] Lecture Input System impossible : " + e.Message);
 
-#if ENABLE_LEGACY_INPUT_MANAGER
-        // Ancien Input seulement si Unity l'autorise.
+            return false;
+        }
+    }
+
+    private Vector2 ReadMousePosition(object mouse)
+    {
         try
         {
-            if (Input.GetMouseButtonDown(0))
-                return true;
+            if (mousePositionProperty == null)
+                return Vector2.zero;
+
+            object positionControl = mousePositionProperty.GetValue(mouse, null);
+
+            if (positionControl == null)
+                return Vector2.zero;
+
+            if (positionReadValueMethod == null)
+            {
+                positionReadValueMethod = positionControl.GetType().GetMethod(
+                    "ReadValue",
+                    BindingFlags.Public | BindingFlags.Instance,
+                    null,
+                    Type.EmptyTypes,
+                    null
+                );
+            }
+
+            if (positionReadValueMethod == null)
+                return Vector2.zero;
+
+            object value = positionReadValueMethod.Invoke(positionControl, null);
+
+            if (value is Vector2 vector)
+                return vector;
         }
         catch
         {
-            // Ignore volontairement.
+            // Ignore.
         }
-#endif
 
-        return false;
+        return Vector2.zero;
     }
+
+#if UNITY_EDITOR
+    [ContextMenu("OBELISK / Auto Fill Direction Zones")]
+    private void EditorAutoFillDirectionZones()
+    {
+        AutoFindDirectionZones();
+        CacheReferences();
+
+        UnityEditor.EditorUtility.SetDirty(this);
+
+        Debug.Log("[BucketQuestRoomClickFixV3] Auto Fill Direction Zones terminé.");
+    }
+#endif
 }
