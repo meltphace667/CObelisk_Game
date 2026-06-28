@@ -4324,12 +4324,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 678381b47d440a74482a7f149722516d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScreenFader
-  delayBeforeFirstReveal: 1
+  delayBeforeFirstReveal: 0.3
   firstFadeDuration: 5.7
-  fadeToBlackDuration: 0.25
-  blackHoldDuration: 0.25
-  fadeFromBlackDuration: 1.2
-  visualCurvePower: 1.25
+  fadeToBlackDuration: 0.3
+  blackHoldDuration: 0.3
+  fadeFromBlackDuration: 0.3
+  visualCurvePower: 1.15
   alwaysStayOnTop: 1
   enforceTopEveryFrame: 1
   blockRaycastsDuringFade: 1
