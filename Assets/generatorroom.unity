@@ -1639,6 +1639,22 @@ MonoBehaviour:
     gauche: CHA_INT_01
     droite: 
   startRoomId: PRA_01
+  changeRoomWhenFadeLooksBlack: 1
+  roomSwapOpaqueAlphaThreshold: 0.92
+  fallbackRoomSwapDelayAfterFadeToBlackStarts: 0.12
+  unlockInputWhenFadeIsHumanClear: 1
+  humanClearAlphaThreshold: 0.04
+  fallbackUnlockDelayAfterFadeFromBlackStarts: 0.06
+  emergencyMaxInputLockAfterRoomReady: 0.35
+  queueLastMoveDuringVisualTail: 1
+  keepOnlyLastQueuedMove: 1
+  minimumSecondsBetweenMoves: 0.06
+  fadeOverlayGraphic: {fileID: 0}
+  fadeOverlayCanvasGroup: {fileID: 0}
+  autoFindFadeOverlay: 1
+  forceFadeOverlayNotRaycastable: 1
+  forceRoomImagesNotRaycastable: 1
+  debugTransitionSync: 0
 --- !u!4 &712968835
 Transform:
   m_ObjectHideFlags: 0
@@ -4286,6 +4302,7 @@ GameObject:
   - component: {fileID: 1397905327}
   - component: {fileID: 1397905326}
   - component: {fileID: 1397905325}
+  - component: {fileID: 1397905328}
   m_Layer: 5
   m_Name: FadeOverlay
   m_TagString: Untagged
@@ -4324,11 +4341,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 678381b47d440a74482a7f149722516d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScreenFader
-  delayBeforeFirstReveal: 0.3
+  delayBeforeFirstReveal: 0.6
   firstFadeDuration: 5.7
-  fadeToBlackDuration: 0.3
-  blackHoldDuration: 0.3
-  fadeFromBlackDuration: 0.3
+  fadeToBlackDuration: 0.35
+  blackHoldDuration: 0.35
+  fadeFromBlackDuration: 0.35
   visualCurvePower: 1.15
   alwaysStayOnTop: 1
   enforceTopEveryFrame: 1
@@ -4347,7 +4364,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -4371,6 +4388,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1397905323}
   m_CullTransparentMesh: 1
+--- !u!114 &1397905328
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1397905323}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0e0b23da6d9aa3439bfb1fbc0c4d8dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObeliskFadeOverlayClickThrough
+  disableGraphicRaycasts: 1
+  disableCanvasGroupBlocking: 1
+  keepCheckingAtRuntime: 1
 --- !u!1 &1411043143
 GameObject:
   m_ObjectHideFlags: 0

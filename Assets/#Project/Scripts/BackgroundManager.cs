@@ -36,10 +36,81 @@ public class BackgroundManager : MonoBehaviour
     [Header("Room active au démarrage")]
     [SerializeField] private string startRoomId = "PRA_01";
 
+    [Header("Transition - fluidité humaine")]
+    [Tooltip("Change la room avant la fin technique du fade-to-black, dès que le noir est assez opaque pour que l'humain ne voie pas le changement.")]
+    [SerializeField] private bool changeRoomWhenFadeLooksBlack = true;
+
+    [Tooltip("Alpha du fade noir à partir duquel on peut changer la room sans que l'oeil voie le swap. 0.90 à 0.97 conseillé.")]
+    [Range(0.75f, 1f)]
+    [SerializeField] private float roomSwapOpaqueAlphaThreshold = 0.92f;
+
+    [Tooltip("Si l'alpha du fade est introuvable, délai de secours avant de changer la room pendant le fade-to-black.")]
+    [SerializeField] private float fallbackRoomSwapDelayAfterFadeToBlackStarts = 0.12f;
+
+    [Tooltip("Débloque l'input quand le fade depuis noir est visuellement fini pour l'humain, pas quand la coroutine est mathématiquement finie.")]
+    [SerializeField] private bool unlockInputWhenFadeIsHumanClear = true;
+
+    [Tooltip("Alpha du fade noir à partir duquel l'humain ne perçoit presque plus le noir. 0.03 à 0.06 conseillé.")]
+    [Range(0f, 0.15f)]
+    [SerializeField] private float humanClearAlphaThreshold = 0.04f;
+
+    [Tooltip("Si l'alpha du fade est introuvable, délai de secours avant de rendre l'input après le début du fade depuis noir.")]
+    [SerializeField] private float fallbackUnlockDelayAfterFadeFromBlackStarts = 0.06f;
+
+    [Tooltip("Sécurité anti-bug : l'input revient au plus tard après cette durée une fois la nouvelle room prête.")]
+    [SerializeField] private float emergencyMaxInputLockAfterRoomReady = 0.35f;
+
+    [Header("Spam / queue de déplacement")]
+    [Tooltip("Quand le joueur clique pendant la toute fin visuelle d'une transition, on garde le dernier déplacement valide et on le lance proprement juste après.")]
+    [SerializeField] private bool queueLastMoveDuringVisualTail = true;
+
+    [Tooltip("Quand le joueur spam plusieurs directions pendant la fin d'un fade, seul le dernier clic valide est gardé.")]
+    [SerializeField] private bool keepOnlyLastQueuedMove = true;
+
+    [Tooltip("Évite les doubles déplacements instantanés avec des fades très courts.")]
+    [SerializeField] private float minimumSecondsBetweenMoves = 0.06f;
+
+    [Header("Fade overlay - optionnel")]
+    [Tooltip("Si vide, auto-find depuis ScreenFader.")]
+    [SerializeField] private Graphic fadeOverlayGraphic;
+
+    [Tooltip("Optionnel. Si le fade utilise un CanvasGroup, mets-le ici ou laisse Auto Find.")]
+    [SerializeField] private CanvasGroup fadeOverlayCanvasGroup;
+
+    [SerializeField] private bool autoFindFadeOverlay = true;
+
+    [Tooltip("Le fade noir doit être seulement visuel : il ne doit jamais bloquer les raycasts/clics.")]
+    [SerializeField] private bool forceFadeOverlayNotRaycastable = true;
+
+    [Header("Images de rooms")]
+    [SerializeField] private bool forceRoomImagesNotRaycastable = true;
+
+    [Header("Debug")]
+    [SerializeField] private bool debugTransitionSync = false;
+
     private string currentRoomId;
     private bool isChangingRoom = false;
+    private bool isVisualTransitionRunning = false;
+    private bool roomSwapDoneForCurrentTransition = false;
+    private float lastMoveStartTime = -999f;
 
+    private bool hasQueuedTarget = false;
+    private string queuedTargetId = "";
+    private Direction queuedDirection;
+
+    /// <summary>
+    /// À utiliser par les zones/cursors pour bloquer le gameplay.
+    /// Repasse à false dès que l'image est humainement lisible.
+    /// </summary>
     public bool IsChangingRoom => isChangingRoom;
+
+    /// <summary>
+    /// True tant qu'une animation de transition existe encore.
+    /// TryMove peut mettre un déplacement en queue pendant cette phase.
+    /// </summary>
+    public bool IsVisualTransitionRunning => isVisualTransitionRunning;
+
+    public bool HasQueuedMove => hasQueuedTarget;
 
     public event Action<string> OnRoomChanged;
 
@@ -52,11 +123,16 @@ public class BackgroundManager : MonoBehaviour
         }
 
         Instance = this;
+
+        AutoFindFadeOverlayReferences();
+        ApplyFadeOverlayClickThrough();
     }
 
     private void Start()
     {
         PrepareRooms();
+        AutoFindFadeOverlayReferences();
+        ApplyFadeOverlayClickThrough();
         ChangeToImmediate(startRoomId);
     }
 
@@ -64,16 +140,110 @@ public class BackgroundManager : MonoBehaviour
     {
         foreach (Room room in rooms)
         {
-            if (room.image == null)
+            if (room == null || room.image == null)
                 continue;
 
             room.image.SetActive(false);
 
-            Image img = room.image.GetComponent<Image>();
-
-            if (img != null)
-                img.raycastTarget = false;
+            if (forceRoomImagesNotRaycastable)
+                DisableRaycastsOnGameObject(room.image);
         }
+    }
+
+    private void DisableRaycastsOnGameObject(GameObject root)
+    {
+        if (root == null)
+            return;
+
+        Graphic[] graphics = root.GetComponentsInChildren<Graphic>(true);
+
+        for (int i = 0; i < graphics.Length; i++)
+        {
+            if (graphics[i] != null)
+                graphics[i].raycastTarget = false;
+        }
+
+        CanvasGroup[] groups = root.GetComponentsInChildren<CanvasGroup>(true);
+
+        for (int i = 0; i < groups.Length; i++)
+        {
+            if (groups[i] == null)
+                continue;
+
+            groups[i].blocksRaycasts = false;
+            groups[i].interactable = false;
+        }
+    }
+
+    private void ApplyFadeOverlayClickThrough()
+    {
+        if (!forceFadeOverlayNotRaycastable)
+            return;
+
+        AutoFindFadeOverlayReferences();
+
+        if (fadeOverlayGraphic != null)
+            fadeOverlayGraphic.raycastTarget = false;
+
+        if (fadeOverlayCanvasGroup != null)
+        {
+            fadeOverlayCanvasGroup.blocksRaycasts = false;
+            fadeOverlayCanvasGroup.interactable = false;
+        }
+    }
+
+    private void AutoFindFadeOverlayReferences()
+    {
+        if (!autoFindFadeOverlay)
+            return;
+
+        if (ScreenFader.Instance == null)
+            return;
+
+        if (fadeOverlayGraphic == null)
+        {
+            Graphic[] graphics = ScreenFader.Instance.GetComponentsInChildren<Graphic>(true);
+            fadeOverlayGraphic = PickBestFadeGraphic(graphics);
+        }
+
+        if (fadeOverlayCanvasGroup == null)
+        {
+            CanvasGroup[] groups = ScreenFader.Instance.GetComponentsInChildren<CanvasGroup>(true);
+
+            if (groups != null && groups.Length > 0)
+                fadeOverlayCanvasGroup = groups[0];
+        }
+    }
+
+    private Graphic PickBestFadeGraphic(Graphic[] graphics)
+    {
+        if (graphics == null || graphics.Length == 0)
+            return null;
+
+        Graphic fallback = null;
+
+        for (int i = 0; i < graphics.Length; i++)
+        {
+            Graphic graphic = graphics[i];
+
+            if (graphic == null)
+                continue;
+
+            if (fallback == null)
+                fallback = graphic;
+
+            string lowerName = graphic.gameObject.name.ToLowerInvariant();
+
+            if (lowerName.Contains("fade") ||
+                lowerName.Contains("black") ||
+                lowerName.Contains("overlay") ||
+                lowerName.Contains("fader"))
+            {
+                return graphic;
+            }
+        }
+
+        return fallback;
     }
 
     public void TryMove(Direction direction)
@@ -81,55 +251,282 @@ public class BackgroundManager : MonoBehaviour
         if (isChangingRoom)
             return;
 
+        if (isVisualTransitionRunning)
+        {
+            TryQueueMove(direction);
+            return;
+        }
+
+        if (Time.unscaledTime - lastMoveStartTime < minimumSecondsBetweenMoves)
+            return;
+
+        TryStartMoveNow(direction);
+    }
+
+    public void ChangeTo(string targetId)
+    {
+        if (string.IsNullOrEmpty(targetId))
+            return;
+
+        if (isChangingRoom)
+            return;
+
+        if (isVisualTransitionRunning)
+        {
+            QueueTarget(targetId, Direction.Bas);
+            return;
+        }
+
+        if (Time.unscaledTime - lastMoveStartTime < minimumSecondsBetweenMoves)
+            return;
+
+        StartCoroutine(ChangeToWithFade(targetId));
+    }
+
+    private void TryStartMoveNow(Direction direction)
+    {
+        string targetId;
+
+        if (!TryGetTargetForDirection(direction, out targetId))
+            return;
+
+        StartCoroutine(ChangeToWithFade(targetId));
+    }
+
+    private bool TryGetTargetForDirection(Direction direction, out string targetId)
+    {
+        targetId = "";
+
         Room currentRoom = GetRoom(currentRoomId);
 
         if (currentRoom == null)
         {
             Debug.LogError($"[BackgroundManager] Room courante introuvable : '{currentRoomId}'");
-            return;
+            return false;
         }
 
-        string targetId = GetTargetId(currentRoom, direction);
+        targetId = GetTargetId(currentRoom, direction);
 
         if (string.IsNullOrEmpty(targetId))
         {
             Debug.Log($"[BackgroundManager] Pas de sortie vers {direction} depuis '{currentRoomId}'");
-            return;
+            return false;
         }
 
         if (ObeliskBlackSquareDirector.Instance != null &&
             !ObeliskBlackSquareDirector.Instance.CanMove(currentRoomId, direction, targetId))
         {
-            return;
+            targetId = "";
+            return false;
         }
 
-        StartCoroutine(ChangeToWithFade(targetId));
+        return true;
     }
 
-    public void ChangeTo(string targetId)
+    private void TryQueueMove(Direction direction)
     {
-        if (isChangingRoom)
+        if (!queueLastMoveDuringVisualTail)
             return;
 
-        StartCoroutine(ChangeToWithFade(targetId));
+        string targetId;
+
+        if (!TryGetTargetForDirection(direction, out targetId))
+            return;
+
+        QueueTarget(targetId, direction);
+    }
+
+    private void QueueTarget(string targetId, Direction direction)
+    {
+        if (string.IsNullOrEmpty(targetId))
+            return;
+
+        if (!keepOnlyLastQueuedMove && hasQueuedTarget)
+            return;
+
+        queuedTargetId = targetId;
+        queuedDirection = direction;
+        hasQueuedTarget = true;
+
+        if (debugTransitionSync)
+            Debug.Log($"[BackgroundManager] Move queued : {direction} → {targetId}");
     }
 
     private IEnumerator ChangeToWithFade(string targetId)
     {
         isChangingRoom = true;
+        isVisualTransitionRunning = true;
+        roomSwapDoneForCurrentTransition = false;
+        hasQueuedTarget = false;
+        queuedTargetId = "";
+        lastMoveStartTime = Time.unscaledTime;
+
+        ApplyFadeOverlayClickThrough();
 
         if (ScreenFader.Instance != null)
-            yield return ScreenFader.Instance.FadeToBlackRoutine();
+        {
+            if (changeRoomWhenFadeLooksBlack)
+            {
+                Coroutine fadeToBlackCoroutine = StartCoroutine(ScreenFader.Instance.FadeToBlackRoutine());
 
-        ChangeToImmediate(targetId);
+                yield return WaitUntilFadeLooksOpaqueEnoughForRoomSwap();
+
+                if (!roomSwapDoneForCurrentTransition)
+                {
+                    ChangeToImmediate(targetId);
+                    roomSwapDoneForCurrentTransition = true;
+                }
+
+                yield return fadeToBlackCoroutine;
+            }
+            else
+            {
+                yield return ScreenFader.Instance.FadeToBlackRoutine();
+
+                ChangeToImmediate(targetId);
+                roomSwapDoneForCurrentTransition = true;
+            }
+        }
+        else
+        {
+            ChangeToImmediate(targetId);
+            roomSwapDoneForCurrentTransition = true;
+        }
 
         if (ScreenFader.Instance != null)
             yield return ScreenFader.Instance.HoldBlackRoutine();
 
-        if (ScreenFader.Instance != null)
-            yield return ScreenFader.Instance.FadeFromBlackRoutine();
+        ApplyFadeOverlayClickThrough();
 
-        isChangingRoom = false;
+        if (ScreenFader.Instance != null)
+        {
+            if (unlockInputWhenFadeIsHumanClear)
+            {
+                Coroutine fadeFromBlackCoroutine = StartCoroutine(ScreenFader.Instance.FadeFromBlackRoutine());
+
+                yield return WaitUntilFadeFeelsClearToHuman();
+
+                isChangingRoom = false;
+
+                if (debugTransitionSync)
+                    Debug.Log("[BackgroundManager] Input débloqué : fade humainement clair.");
+
+                yield return fadeFromBlackCoroutine;
+            }
+            else
+            {
+                yield return ScreenFader.Instance.FadeFromBlackRoutine();
+                isChangingRoom = false;
+            }
+        }
+        else
+        {
+            isChangingRoom = false;
+        }
+
+        isVisualTransitionRunning = false;
+        ApplyFadeOverlayClickThrough();
+
+        if (hasQueuedTarget)
+        {
+            string nextTarget = queuedTargetId;
+            hasQueuedTarget = false;
+            queuedTargetId = "";
+
+            if (debugTransitionSync)
+                Debug.Log($"[BackgroundManager] Move queued lancé → {nextTarget}");
+
+            if (!string.IsNullOrEmpty(nextTarget) && RoomExists(nextTarget))
+                StartCoroutine(ChangeToWithFade(nextTarget));
+        }
+    }
+
+    private IEnumerator WaitUntilFadeLooksOpaqueEnoughForRoomSwap()
+    {
+        float elapsed = 0f;
+        bool alphaWasReadableOnce = false;
+
+        while (true)
+        {
+            ApplyFadeOverlayClickThrough();
+
+            float alpha;
+            bool alphaReadable = TryGetFadeAlpha(out alpha);
+
+            if (alphaReadable)
+            {
+                alphaWasReadableOnce = true;
+
+                if (alpha >= roomSwapOpaqueAlphaThreshold)
+                    yield break;
+            }
+            else
+            {
+                if (!alphaWasReadableOnce && elapsed >= fallbackRoomSwapDelayAfterFadeToBlackStarts)
+                    yield break;
+            }
+
+            // Sécurité : même si l'alpha est mal lu, on ne reste jamais bloqué.
+            if (elapsed >= Mathf.Max(fallbackRoomSwapDelayAfterFadeToBlackStarts, 0.25f))
+                yield break;
+
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+    }
+
+    private IEnumerator WaitUntilFadeFeelsClearToHuman()
+    {
+        float elapsed = 0f;
+        bool alphaWasReadableOnce = false;
+
+        while (elapsed < emergencyMaxInputLockAfterRoomReady)
+        {
+            ApplyFadeOverlayClickThrough();
+
+            float alpha;
+            bool alphaReadable = TryGetFadeAlpha(out alpha);
+
+            if (alphaReadable)
+            {
+                alphaWasReadableOnce = true;
+
+                if (alpha <= humanClearAlphaThreshold)
+                    yield break;
+            }
+            else
+            {
+                if (!alphaWasReadableOnce && elapsed >= fallbackUnlockDelayAfterFadeFromBlackStarts)
+                    yield break;
+            }
+
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        if (debugTransitionSync)
+            Debug.LogWarning("[BackgroundManager] Déblocage input par sécurité : impossible de confirmer alpha fade.");
+    }
+
+    private bool TryGetFadeAlpha(out float alpha)
+    {
+        alpha = 0f;
+
+        AutoFindFadeOverlayReferences();
+
+        if (fadeOverlayCanvasGroup != null)
+        {
+            alpha = fadeOverlayCanvasGroup.alpha;
+            return true;
+        }
+
+        if (fadeOverlayGraphic != null)
+        {
+            alpha = fadeOverlayGraphic.color.a;
+            return true;
+        }
+
+        return false;
     }
 
     private void ChangeToImmediate(string targetId)
@@ -144,11 +541,20 @@ public class BackgroundManager : MonoBehaviour
 
         foreach (Room room in rooms)
         {
-            if (room.image != null)
-                room.image.SetActive(false);
+            if (room == null || room.image == null)
+                continue;
+
+            room.image.SetActive(false);
+
+            if (forceRoomImagesNotRaycastable)
+                DisableRaycastsOnGameObject(room.image);
         }
 
         target.image.SetActive(true);
+
+        if (forceRoomImagesNotRaycastable)
+            DisableRaycastsOnGameObject(target.image);
+
         currentRoomId = targetId;
 
         Debug.Log($"[BackgroundManager] → {targetId}");
@@ -172,7 +578,7 @@ public class BackgroundManager : MonoBehaviour
 
         foreach (Room room in rooms)
         {
-            if (!string.IsNullOrEmpty(room.id))
+            if (room != null && !string.IsNullOrEmpty(room.id))
                 ids.Add(room.id);
         }
 
@@ -319,6 +725,6 @@ public class BackgroundManager : MonoBehaviour
 
     private Room GetRoom(string id)
     {
-        return rooms.Find(room => room.id == id);
+        return rooms.Find(room => room != null && room.id == id);
     }
 }
